@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>D3v6 Refactor</title>
+    <!-- call external d3.js framework -->
+    <!-- <script src="https://d3js.org/d3.v6.js"></script> -->
+    <script src="../node_modules/d3/dist/d3.min.js"></script>
+</head>
+
+<style>
+    body {
+        overflow: hidden;
+        background-color: rgb(220, 220, 220);
+        margin: 0px;
+    }
+
+    .node {
+        stroke: white;
+        stroke-width: 2px;
+        cursor: pointer;
+    }
+
+    .node:hover {
+        stroke: red
+    }
+
+    .link {
+        fill: none;
+        cursor: default;
+        stroke: rgb(0, 0, 0);
+        stroke-width: 3px;
+    }
+
+    .dragline {
+        stroke-width: 2;
+        pointer-events: none;
+    }
+
+    .dragline.hidden {
+        stroke-width: 0;
+    }
+
+    #context-menu-node {
+        font-family: "Open Sans", sans-serif;
+        position: fixed;
+        z-index: 10000;
+        width: 190px;
+        background: whitesmoke;
+        border: 2px;
+        border-radius: 6px;
+        border-color: white;
+        border-style: solid;
+        transform: scale(0);
+        transform-origin: top left;
+    }
+
+    #context-menu-node.active {
+        transform: scale(1);
+        transition: transform 200ms ease-in-out;
+    }
+
+    #context-menu-node .item {
+        padding: 8px 10px;
+        font-size: 15px;
+        color: black;
+    }
+
+    #context-menu-node .item i {
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    #context-menu-node hr {
+        margin: 5px 0px;
+        border-color: whitesmoke;
+    }
+
+    #context-menu-node .item:hover {
+        background: lightblue;
+    }
+</style>
+
+<body>
+    <!-- right click context menu node -->
+    <div id="context-menu-node">
+        <div id="addLink" class="item">
+            <i class="fas fa-link"></i></i> Add Link
+        </div>
+        <hr>
+        <div id="addNode" class="item">
+            <i class="fas fa-link"></i></i> Add Node
+        </div>
+    </div>
+
+    <svg id="svg"> </svg>
+
+    <script>
+        var graph = {
+            "nodes": [
+                {
+                    "id": 0,
+                },
+                {
+                    "id": 1,
+                },
+                {
+                    "id": 2,
+                }
+            ],
+            "links": [
+                {
+                    "source": 0,
+                    "target": 1,
+                },
+                {
+                    "source": 1,
+                    "target": 2,
+                }
+            ]
+        }
+
+        var width = window.innerWidth
+        var height = window.innerHeight
+
+        var svg = d3.select("svg")
+            .attr("class", "canvas")
+            .attr("width", width)
+            .attr("height", height)
+            .call(d3.zoom().on("zoom", function (event) {
+                svg.attr("transform", event.transform)
+            }))
+            //.on("mousedown", mousedownSVG)
+            .on("mousemove", mousemoveSVG)
+            .on("mouseup", mouseupSVG)
+            .append("g")
+
+        // remove zoom on dblclick listener
+        d3.select("svg").on("dblclick.zoom", null)
+
+        var linkContainer = svg.append("g").attr("class", "linkContainer")
+        var nodeContainer = svg.append("g").attr("class", "nodeContainer")
+
+        var mousedownNode = "";
+        var targetLink = "";
+        var addLinkClicked = false;
+
+        var simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function (d) {
+                return d.id;
+            }).distance(100))
+            .force("charge", d3.forceManyBody().strength(-500))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide().radius(50))
+
+        var dragLine = svg.append("path")
+            .attr("class", "link dragline")
+            .attr("d", "M0,0 L0,0");
+
+        initialize()
+
+        function initialize() {
+
+            link = linkContainer.selectAll(".link")
+                .data(graph.links)
+                .join("line")
+                .attr("class", "link")
+
+            node = nodeContainer.selectAll(".node")
+                .data(graph.nodes, d => d.id)
+                .join("g")
+                .attr("class", "node")
+
+                .call(d3.drag()
+                    .on("start", dragStarted)
+                    .on("drag", dragged)
+                    .on("end", dragEnded)
+                )
+
+            node
+                .data(graph.nodes, d => d.id)
+                .append("circle")
+                .attr("r", 30)
+                .style("fill", "whitesmoke")
+                .on("contextmenu", contextMenuNode)
+                .on("mouseenter", (event, d) => {
+                    targetLink = d
+                })
+                .on("mousedown", (event, d) => {
+                    mousedownNode = d;
+                })
+                .on("click", function (event, d) {
+                    if (!addLinkClicked) return
+
+                    // needed by FF
+                    dragLine
+                        .classed('hidden', true)
+
+                    console.log(targetLink.id)
+
+                    graph.links.push({ source: thisElement.id, target: targetLink.id });
+
+                    addLinkClicked = false;
+
+                    initialize();
+
+                    simulation.alpha(0.3).restart()
+                });
+
+            node
+                .append("text")
+                .style("class", "icon")
+                .attr("font-family", "FontAwesome")
+                .attr("dominant-baseline", "central")
+                .attr("text-anchor", "middle")
+                .attr("font-size", 30)
+                .attr("fill", "black")
+                .attr("stroke-width", "0px")
+                .attr("pointer-events", "none")
+                .text((d) => {
+                    return d.id
+                })
+
+            simulation
+                .nodes(graph.nodes)
+                .on("tick", ticked);
+
+            simulation
+                .force("link")
+                .links(graph.links)
+
+        }
+
+
+        function contextMenuNode(event, d) {
+            thisElement = d
+
+            event.preventDefault()
+
+            document.getElementById("context-menu-node").classList.remove("active")
+
+            var contextMenu = document.getElementById("context-menu-node")
+            contextMenu.style.top = event.clientY + "px"
+            contextMenu.style.left = event.clientX + "px"
+            contextMenu.classList.add("active")
+
+            window.addEventListener("click", function () {
+                contextMenu.classList.remove("active")
+            })
+
+            document.getElementById("addNode").addEventListener("click", addNode)
+            document.getElementById("addLink").addEventListener("click", addLink)
+        }
+
+        function addLink() {
+            addLinkClicked = true
+
+            const point = d3.pointer(event)
+
+            dragLine
+                .classed("hidden", false)
+                .attr('d', `M${thisElement.x},${thisElement.y}L${thisElement.x},${thisElement.y}`);
+        }
+
+        function addNode() {
+            var newID = Math.floor(Math.random() * 1000)
+
+            graph.nodes.push({
+                "id": newID
+            })
+
+            graph.links.push({ source: newID, target: thisElement.id })
+
+            initialize()
+
+            simulation.alpha(0.3).restart()
+        }
+
+
+        /*
+        function mousedownSVG(event) {
+            var point = d3.pointer(event)
+            
+            var newNode = { id: graph.nodes.length, x: point[0], y: point[1] }
+            
+            graph.nodes.push(newNode)
+            
+            initialize()
+            
+            simulation.alpha(0.3).restart()
+        }
+        */
+
+        function mousemoveSVG(event) {
+            if (!addLinkClicked) return
+
+            const point = d3.pointer(event, svg.node()); // <--- add svg.node() as 'target'
+            //console.log(point);
+
+            // update drag line
+            dragLine.attr('d', `M${mousedownNode.x},${mousedownNode.y}L${point[0]},${point[1]}`);
+        }
+
+        function mouseupSVG(event) {
+            if (mousedownNode) {
+                //hide drag line
+                dragLine
+                    .classed("hidden", true)
+            }
+        }
+
+        function ticked() {
+            // update link positions
+            link
+                .attr("x1", function (d) {
+                    return d.source.x;
+                })
+                .attr("y1", function (d) {
+                    return d.source.y;
+                })
+                .attr("x2", function (d) {
+                    return d.target.x;
+                })
+                .attr("y2", function (d) {
+                    return d.target.y;
+                });
+
+
+            // update node positions
+            node
+                .attr("transform", function (d) {
+                    return "translate(" + d.x + ", " + d.y + ")";
+                });
+        }
+
+
+        function dragStarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragEnded(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = undefined;
+            d.fy = undefined;
+        }
+    </script>
+</body>
+
+</html>

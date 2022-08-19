@@ -1,0 +1,284 @@
+html * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  overflow-y: hidden;
+}
+header {
+  margin-left: 50px;
+}
+#chart {
+  width: 1280px;
+  position: relative;
+}
+
+.chart .axis text {
+  font: 10px sans-serif;
+}
+
+.chart .axis .domain,
+.chart .axis .tick line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.chart .gridlines {
+  stroke: lightgrey;
+  shape-rendering: crispEdges;
+  stroke-width: 1;
+}
+
+/* .chart .ohlc-series path.low-line {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 3.5;
+} */
+
+.chart .ohlc-series .up-days {
+  stroke: green;
+}
+
+.chart .ohlc-series .down-days {
+  stroke: red;
+}
+
+.chart .ohlc-series .bar.up-day {
+  stroke: green;
+}
+
+.chart .ohlc-series .bar.down-day {
+  stroke: red;
+}
+.chart .bar_series .bary.upy-day {
+  stroke: #92d2cc;
+  fill: #92d2cc;
+}
+.chart .bar_series .bary.downy-day {
+  stroke: #f7a8a7;
+  fill: #f7a8a7;
+}
+
+select {
+  display: block;
+  margin-left: 4em;
+}
+/* .chart .candlestick-series .bar path {
+  stroke: black;
+} */
+
+.chart .comparison-series .line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart .zoom-pane {
+  fill: none;
+  pointer-events: all;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+.chart .ma-path {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.chart .tracker-close-avg {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-dasharray: 3, 3;
+}
+.chart line.crosshairs {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-opacity: 0.5;
+}
+
+.chart circle.crosshairs {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-opacity: 0.5;
+}
+.macd_line,
+.cci_line,
+.signal_line {
+  fill: none;
+}
+.chart text.crosshairs {
+  font: 10px sans-serif;
+}
+.chart .overlay {
+  stroke-width: 0px;
+  fill-opacity: 0;
+}
+.tick line {
+  opacity: 0.1;
+}
+
+.tick text {
+  font: 10px sans-serif;
+}
+
+.axis path.domain {
+  opacity: 0.1;
+}
+
+.sidebar input {
+  font-size: 15px;
+  color: #fff;
+  font-weight: 400;
+  outline: none;
+  height: 50px;
+  width: 100%;
+  width: 80px;
+  border: none;
+  border-radius: 12px;
+  transition: all 0.5s ease;
+  background: #1d1b31;
+}
+
+.sidebar .bx-search {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-size: 22px;
+  background: #1d1b31;
+  color: #fff;
+}
+.bollinger_series {
+  opacity: 0.5;
+}
+.bollinger_series .bollingerBandArea {
+  fill: lightgrey;
+  stroke-width: 0;
+}
+
+.bollinger_series .bollingerBandUpper {
+  fill: none;
+  stroke: darkgrey;
+  stroke-width: 2;
+}
+
+.bollinger_series .bollingerBandLower {
+  fill: none;
+  stroke: darkgrey;
+  stroke-width: 2;
+}
+
+.bollinger_series .bollingerAverage {
+  fill: none;
+  stroke: darkgrey;
+  stroke-width: 3;
+  stroke-dasharray: 4, 1;
+}
+.trendline_series {
+  fill: none;
+  stroke: red;
+  stroke-dasharray: 5, 5;
+  stroke-width: 1.5px;
+}
+/********** header ************/
+header {
+  background: #e0e0e0;
+  width: 100%-50px;
+}
+ul {
+  list-style-type: none;
+  overflow: hidden;
+  background-color: #333;
+  display: flex;
+}
+.maheader {
+  flex-direction: row;
+  width: 50%;
+}
+.head {
+  flex: 1 1 auto;
+  place-self: center;
+}
+
+button {
+  background-color: #e0e0e0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.head button,
+.dropbtn {
+  height: 40px;
+  display: inline-block;
+  color: rgb(1, 60, 8);
+  text-align: center;
+  padding: 0;
+  text-decoration: none;
+}
+
+.head button:hover,
+.dropdown:hover .dropbtn {
+  background-color: #c1c1c1;
+}
+
+.dropdown.head {
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-content button {
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content button:hover {
+  background-color: #c1c1c1;
+}
+
+.show {
+  display: block;
+}
+/********** sidebar ************/
+aside {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 50px;
+  background-color: #e0e0e0;
+  height: 100%;
+}
+.sidebar {
+  flex-direction: column;
+  width: 50px;
+}
+i {
+  height: 50px;
+  min-width: 50px;
+  text-align: center;
+  line-height: 50px !important;
+  color: rgb(0, 0, 0);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+aside .dropdown-content {
+  margin-top: -50px;
+  left: 50px;
+}
+header i {
+  margin-top: -5px;
+}

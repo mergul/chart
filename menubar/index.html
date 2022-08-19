@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .maheader {
+            list-style-type: none;
+            overflow: hidden;
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            width: 50px;
+        }
+
+        .head {
+            flex: 1 1 50px;
+            place-self: center;
+        }
+
+        button {
+            background-color: #121312;
+            padding: 14px 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .head button,
+        .dropbtn {
+            display: inline-block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .head button:hover,
+        .dropdown:hover .dropbtn {
+            background-color: #501c1c;
+        }
+
+        .dropdown.head {
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            left: 50px;
+            margin-top: -50px;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .dropdown-content button {
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #501c1c
+        }
+
+        .show {
+            display: block;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" />
+</head>
+
+<body>
+    <ul class="maheader">
+        <li class="head"><button class="active"><i class='bx bx-history'></i>
+            </button></li>
+        <li class="head"><button><i class='bx bx-history'></i>
+            </button></li>
+        <li class="dropdown head">
+            <button class="dropbtn" id="btn0" onclick="myFunction(0)"><i class='bx bx-history'></i>
+            </button>
+            <div class="dropdown-content" id="myDropdown0">
+                <button>Link 1</button>
+                <button>Link 2</button>
+                <button>Link 3</button>
+            </div>
+        </li>
+        <li class="dropdown head">
+            <button class="dropbtn" id="btn1" onclick="myFunction(1)"><i class='bx bx-history'></i>
+            </button>
+            <div class="dropdown-content" id="myDropdown1">
+                <button>Link 1</button>
+                <button>Link 2</button>
+                <button>Link 3</button>
+            </div>
+        </li>
+        <li class="dropdown head">
+            <button class="dropbtn" id="btn2" onclick="myFunction(2)"><i class='bx bx-history'></i>
+            </button>
+            <div class="dropdown-content" id="myDropdown2">
+                <button>Link 1</button>
+                <button>Link 2</button>
+                <button>Link 3</button>
+            </div>
+        </li>
+    </ul>
+    <script>
+        var index;
+        function myFunction(x) {
+            document.getElementById("myDropdown" + x).classList.toggle("show");
+            index = x;
+        }
+        window.onclick = function (e) {
+            if (!e.target.matches('.dropbtn#btn' + index) && !e.target.parentNode.matches('.dropbtn#btn' + index)) {
+                index = -1;
+            }
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var d = 0; d < dropdowns.length; d++) {
+                var openDropdown = dropdowns[d];
+                if (openDropdown.classList.contains('show') && d != index) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+
+        }
+    </script>
+</body>
+
+</html>

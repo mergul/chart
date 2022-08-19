@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Getting Started with Chart JS with www.chartjs3.com</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+
+    .chartMenu {
+      width: 100vw;
+      height: 40px;
+      background: #1A1A1A;
+      color: rgba(255, 26, 104, 1);
+    }
+
+    .chartMenu p {
+      padding: 10px;
+      font-size: 20px;
+    }
+
+    .chartCard {
+      width: 100vw;
+      height: calc(100vh - 40px);
+      background: rgba(255, 26, 104, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chartBox {
+      position: relative;
+      width: 80vw;
+      height: 80vh;
+      padding: 20px;
+      border-radius: 20px;
+      border: solid 3px rgba(255, 26, 104, 1);
+      background: white;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@1.27.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+  <script src="./chartjs-financial.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"
+    integrity="sha512-UXumZrZNiOwnTcZSHLOfcTs0aos2MzBWHXOHOuB0J/R44QB0dwY5JgfbvljXcklVf65Gc4El6RjZ+lnwd2az2g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.0/chartjs-plugin-zoom.min.js"
+    integrity="sha512-TT0wAMqqtjXVzpc48sI0G84rBP+oTkBZPgeRYIOVRGUdwJsyS3WPipsNh///ay2LJ+onCM23tipnz6EvEy2/UA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+  <div class="chartMenu">
+    <p>WWW.CHARTJS3.COM (Chart JS 3.7.1)</p>
+  </div>
+  <div class="chartCard">
+    <div class="chartBox">
+      <canvas id="myChart"></canvas>
+    </div>
+    <div>
+      <button id="update">Update</button>
+    </div>
+  </div>
+  <script>
+    const zoomOptions = {
+      limits: {
+        x: {
+          min: new Date('2022-01-01T00:00:00.000Z'),
+          max: new Date('2022-03-31T23:59:59.999Z')
+        },
+        y: { min: 0, max: 200, minRange: 40 }
+      },
+      zoom: {
+        wheel: {
+          enabled: true,
+        },
+        pinch: {
+          enabled: true,
+        },
+        mode: 'xy',
+      },
+      pan: {
+        enabled: true,
+        mode: 'xy',
+      }
+    };
+    const scales = {
+      x: {
+        position: 'bottom',
+        type: 'time',
+        ticks: {
+          autoSkip: true,
+          autoSkipPadding: 50,
+          maxRotation: 0
+        },
+        time: {
+          displayFormats: {
+            hour: 'HH:mm',
+            minute: 'HH:mm',
+            second: 'HH:mm:ss'
+          }
+        }
+      },
+      y: {
+        position: 'right',
+        ticks: {
+          callback: (val, index, ticks) => index === 0 || index === ticks.length - 1 ? null : val,
+        },
+        grid: {
+          borderColor: 'rgba( 10, 10, 10, 0.6)',
+          color: 'rgba( 0, 0, 0, 0.1)',
+        },
+        title: {
+          display: true,
+          text: (ctx) => ctx.scale.axis + ' axis',
+        }
+      },
+    };
+
+    // setup 
+    var barCount = 60;
+    var _seed = Date.now();
+    var initialDateStr = '19 Mar 2022 07:31 GMT';
+
+
+    function valueOrDefault(value, defaultValue) {
+      return typeof value === 'undefined' ? defaultValue : value;
+    }
+    function rand(min, max) {
+      min = valueOrDefault(min, 0);
+      max = valueOrDefault(max, 0);
+      _seed = (_seed * 9301 + 49297) % 233280;
+      return min + (_seed / 233280) * (max - min);
+    }
+    var ctx = document.getElementById('myChart').getContext('2d');
+
+    var barData = getRandomData(initialDateStr, barCount);
+    function lineData() { return barData.map(d => { return { x: d.x, y: d.c } }) };
+
+    const onRefresh = chart => {
+      const _data = chart.data.datasets[0]?.data;
+      let t = Date.now();
+      let last;
+
+      t -= t % 5000;
+      if (_data.length === 0) {
+        _data.push(...barData);
+        _data.push({ x: t - 5000, o: 99, h: 101, l: 98, c: 100 });
+      }
+      last = _data[_data.length - 1];
+      if (t !== last.x) {
+        const c = last.c;
+        last = { x: t, o: c, h: c, l: c, c: c };
+        _data.push(last);
+      }
+      last.c = +(last.c + rand(-0.5, 0.5)).toFixed(2);
+      last.h = +Math.max(last.h, last.c).toFixed(2);
+      last.l = +Math.min(last.l, last.c).toFixed(2);
+    };
+    var chart = new Chart(ctx, {
+      type: 'candlestick',
+      data: {
+        datasets: [{
+          label: 'CHRT - Chart.js Corporation',
+          data: barData
+        }]
+      },
+      options: {
+        scales: scales,
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          zoom: zoomOptions,
+        },
+      }
+    });
+
+    var getRandomInt = function (max) {
+      return Math.floor(Math.random() * Math.floor(max));
+    };
+
+    function randomNumber(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function randomBar(date, lastClose) {
+      var open = +randomNumber(lastClose * 0.95, lastClose * 1.05).toFixed(2);
+      var close = +randomNumber(open * 0.95, open * 1.05).toFixed(2);
+      var high = +randomNumber(Math.max(open, close), Math.max(open, close) * 1.1).toFixed(2);
+      var low = +randomNumber(Math.min(open, close) * 0.9, Math.min(open, close)).toFixed(2);
+      return {
+        x: date.valueOf(),
+        o: open,
+        h: high,
+        l: low,
+        c: close
+      };
+
+    }
+
+    function getRandomData(dateStr, count) {
+      var date = luxon.DateTime.now();
+      var data = [randomBar(date - 300000, 100)];
+      while (data.length < count) {
+        date = date.plus({ seconds: 5 });
+        if (date.weekday <= 9) {
+          data.push(randomBar(date - 300000, data[data.length - 1].c));
+        }
+      }
+      return data;
+    }
+    Chart.Tooltip.positioners.myCustomPositioner = function (elements, eventPosition) {
+      const tooltip = this;
+      return {
+        x: 0,
+        y: 0
+      };
+    };
+    var update = function () {
+      var dataset = chart.config.data.datasets[0];
+
+      // candlestick vs ohlc
+      // var type = document.getElementById('type').value;
+      // dataset.type = type;
+
+      chart.config.options = {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          x: {
+            type: 'realtime',
+            ticks: {
+
+            },
+            realtime: {
+              duration: 1200000,
+              refresh: 500,
+              delay: 0,
+              onRefresh: onRefresh
+            }
+          },
+          y: scales.y
+        },
+        interaction: {
+          intersect: false
+        },
+        animation: false,
+        plugins: {
+          zoom: zoomOptions,
+          streaming: {
+            frameRate: 3
+          },
+          tooltip: {
+            position: 'myCustomPositioner'
+          }
+        },
+      };
+      // linear vs log
+      // var scaleType = document.getElementById('scale-type').value;
+      // chart.config.options.scales.y.type = scaleType;
+
+      // color
+      // var colorScheme = document.getElementById('color-scheme').value;
+      // if (colorScheme === 'neon') {
+      //   dataset.color = {
+      //     up: '#01ff01',
+      //     down: '#fe0000',
+      //     unchanged: '#999',
+      //   };
+      // } else {
+      //   delete dataset.color;
+      // }
+
+      // border
+      // var border = document.getElementById('border').value;
+      // var defaultOpts = Chart.defaults.elements[type];
+      // if (border === 'true') {
+      //   dataset.borderColor = defaultOpts.borderColor;
+      // } else {
+      //   dataset.borderColor = {
+      //     up: defaultOpts.color.up,
+      //     down: defaultOpts.color.down,
+      //     unchanged: defaultOpts.color.up
+      //   };
+      // }
+
+      // mixed charts
+      //var mixed = document.getElementById('mixed').value;
+      if (false) { // mixed === 'true'
+        chart.config.data.datasets = [
+          {
+            label: 'CHRT - Chart.js Corporation',
+            data: barData
+          },
+          {
+            label: 'Close price',
+            type: 'line',
+            data: lineData()
+          }
+        ]
+      }
+      else {
+        chart.config.data.datasets = [
+          {
+            label: 'CHRT - Chart.js Corporation',
+            data: []//barData
+          }
+        ]
+      }
+
+      chart.update();
+    };
+
+    document.getElementById('update')?.addEventListener('click', update);
+
+    document.getElementById('randomizeData')?.addEventListener('click', function () {
+      barData = getRandomData(initialDateStr, barCount);
+      update();
+    });
+    function onReceive(event) {
+
+      // append the new data to the existing chart data
+      chart.data.datasets[0].data.push({
+        x: event.timestamp,
+        y: event.value
+      });
+
+      // update chart datasets keeping the current animation
+      chart.update('quiet');
+    }
+
+    // const dateune = luxon.DateTime.fromRFC2822('01 Jan 2020 00:00:00 GMT');
+    // const datedue = luxon.DateTime.fromRFC2822('02 Jan 2020 01:00:00 GMT');
+    // const date3 = luxon.DateTime.fromRFC2822('03 Jan 2020 02:00:00 GMT');
+    // const date4 = luxon.DateTime.fromRFC2822('04 Jan 2020 03:00:00 GMT');
+    // const date5 = luxon.DateTime.fromRFC2822('05 Jan 2020 04:00:00 GMT');
+    // const date6 = luxon.DateTime.fromRFC2822('06 Jan 2020 05:00:00 GMT');
+    // const date7 = luxon.DateTime.fromRFC2822('07 Jan 2020 06:00:00 GMT');
+
+    // const data = {
+    //   datasets: [{
+    //     data: [
+    //       {
+    //         x: dateune.valueOf(),
+    //         o: 1,
+    //         h: 1.5,
+    //         l: 0.75,
+    //         c: 1.25
+    //       },
+    //       {
+    //         x: datedue.valueOf(),
+    //         o: 2,
+    //         h: 2.75,
+    //         l: 1.75,
+    //         c: 2.5
+    //       },
+    //       {
+    //         x: date3.valueOf(),
+    //         o: 2.5,
+    //         h: 2.75,
+    //         l: 1.95,
+    //         c: 2.65
+    //       },
+    //       {
+    //         x: date4.valueOf(),
+    //         o: 3,
+    //         h: 3.95,
+    //         l: 2.25,
+    //         c: 3.5
+    //       },
+    //       {
+    //         x: date5.valueOf(),
+    //         o: 4,
+    //         h: 5.75,
+    //         l: 3.75,
+    //         c: 4.5
+    //       },
+    //       {
+    //         x: date6.valueOf(),
+    //         o: 12,
+    //         h: 15.75,
+    //         l: 6.75,
+    //         c: 10.5
+    //       },
+    //       {
+    //         x: date7.valueOf(),
+    //         o: 13,
+    //         h: 27.75,
+    //         l: 6.75,
+    //         c: 17.5
+    //       }
+    //     ],
+    //   }]
+    // };
+
+    // // config
+    // const config = {
+    //   type: 'candlestick',
+    //   data,
+    //   options: {}
+    // };
+
+    // // render init block
+    // const myChart = new Chart(
+    //   document.getElementById('myChart'),
+    //   config
+    // );
+  </script>
+
+</body>
+
+</html>

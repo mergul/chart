@@ -1,0 +1,8 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#500C57",
+    "titleBar.activeBackground": "#711179",
+    "titleBar.activeForeground": "#FEFCFF"
+  },
+  "files.autoSave": "onFocusChange"
+}

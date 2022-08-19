@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  .bar {
+    fill: steelblue;
+  }
+
+  .bar:hover {
+    fill: brown;
+  }
+
+  .axis--x path {
+    display: none;
+  }
+</style>
+
+
+<div id="chart"></div>
+<div id="chart2"></div>
+<div id="chart3"></div>
+
+<!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
+<script src="../node_modules/d3/dist/d3.min.js"></script>
+<script src="barChart.js"></script>
+<script src="scatterPlot.js"></script>
+<script src="timeSeriesChart.js"></script>
+
+<script>
+  /* global barChart, scatterPlot d3 */
+
+  var myBarChart = barChart()
+    .width(1200)
+    .height(500)
+    .x(function (d) { return d.letter; })
+    .y(function (d) { return d.frequency; });
+
+  var myScatterPlot = scatterPlot()
+    .width(600)
+    .height(500)
+    .x(function (d) { return d.letter; })
+    .y(function (d) { return d.frequency; });
+
+  var mySeriesPlot = timeSeriesChart()
+    .width(600)
+    .height(500)
+    .x(function (d) { return d.letter; })
+    .y(function (d) { return d.frequency; });
+
+  d3.tsv("data.tsv").then((d) =>
+    d.map((d) => ({
+      letter: d.letter,
+      frequency: +d.frequency,
+      // date: new Date(d.Date),
+      // value: +d.Volume,
+    }))
+  )
+    .then((data) => {
+      d3.select("#chart")
+        .datum(data)
+        .call(myBarChart);
+      setInterval(() => {
+        data.forEach((d) => {
+          d.frequency = Math.random();
+        });
+        d3.select("#chart")
+          .datum(data)
+          .call(myBarChart);
+      }, 3000);
+
+      // d3.select("#chart2")
+      //   .datum(data)
+      //   .call(myScatterPlot);
+
+      // d3.select("#chart3")
+      //   .datum(data)
+      //   .call(mySeriesPlot);
+    });
+
+</script>

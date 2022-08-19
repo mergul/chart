@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>D3.js Charts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" />
+    <!-- <script src="../node_modules/d3/dist/d3.min.js"></script> -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script src="./ohlcBar.js"></script>
+    <script src="./ohlcBarSeries.js"></script>
+    <script src="./volumeSeries.js"></script>
+    <script src="./pathsSeries.js"></script>
+    <script src="./crosshairs.js"></script>
+    <script src="./bollingerSeries.js"></script>
+    <script src="./trendline.js"></script>
+    <script src="./trendings.js"></script>
+    <script src="./sma.js"></script>
+    <script src="./macd.js"></script>
+    <script src="./cciSeries.js"></script>
+    <!-- <script type="text/javascript, module" src="./circular-buffer.js"></script>
+    <script type="text/javascript, module" src="./sama.js"></script>
+    <script type="text/javascript, module" src="./mean-deviation.js"></script> -->
+    <!-- <script type="module" src="./cci.js"></script> -->
+    <script src="./zoomChart.js"></script>
+    <script type="text/javascript" src="./ohlcSemantic.js"></script>
+</head>
+
+<body>
+    <header>
+        <ul class="maheader">
+            <li class="head"><button type="button" class="active" value="candle">candle</button></li>
+            <li class="head"><button type="button" value="bar">bar</button></li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn0" onclick="myFunction(0)"><i class='bx bx-history'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown0">
+                    <button value="liveOut">Live Out</button>
+                    <button value="clearOut">Clear Out</button>
+                    <button value="addTrendlines">trendings</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn1" onclick="myFunction(1)"><i class='bx bx-history'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown1">
+                    <button value="updateInn">Update Inn</button>
+                    <button value="clearInn">Clear Inn</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn2" onclick="myFunction(2)"><i class='bx bx-history'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown2">
+                    <button value="alive">Alive</button>
+                    <button value="dead">Dead</button>
+                    <button value="lines">Lines</button>
+                </div>
+            </li>
+        </ul>
+    </header>
+    <aside>
+        <ul class="sidebar">
+            <li class="head"><button class="active"><i class='bx bx-collection'></i>
+                </button></li>
+            <li class="head"><button><i class='bx bx-book-alt'></i>
+                </button></li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn3" onclick="myFunction(3)"><i class='bx bx-compass'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown3">
+                    <button>Link 1</button>
+                    <button>Link 2</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn4" onclick="myFunction(4)"><i class='bx bx-cog'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown4">
+                    <button value="liveIn">Live In</button>
+                    <button value="clearInn">Clear Inn</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn5" onclick="myFunction(5)"><i class='bx bx-plug'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown5">
+                    <button value="updateOut">Update Out</button>
+                    <button value="clearOut">Clear Out</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn6" onclick="myFunction(6)"><i class='bx bx-line-chart'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown6">
+                    <button value="addBollinger">add Bollinger</button>
+                    <button value="clearBollinger">clear Bollinger</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn7" onclick="myFunction(7)"><i class='bx bx-pie-chart-alt-2'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown7">
+                    <button value="addCci">add Cci</button>
+                    <button value="clearCci">clear Cci</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn8" onclick="myFunction(8)"><i class='bx bx-atom'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown8">
+                    <button value="addTrendline">add Trendline</button>
+                    <button value="clearTrendline">clear Trendline</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn9" onclick="myFunction(9)"><i class='bx bx-history'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown9">
+                    <button value="addMacd">add Macd</button>
+                    <button value="clearMacd">clear Macd</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn10" onclick="myFunction(10)"><i class='bx bx-basket'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown10">
+                    <button value="addAverages">add Averages</button>
+                    <button value="clearAverages">clear Averages</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn11" onclick="myFunction(11)"><i class='bx bx-arch'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown11">
+                    <button>Link 1</button>
+                    <button>Link 2</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+            <li class="dropdown head">
+                <button class="dropbtn" id="btn12" onclick="myFunction(12)"><i class='bx bx-cctv'></i>
+                </button>
+                <div class="dropdown-content" id="myDropdown12">
+                    <button>Link 1</button>
+                    <button>Link 2</button>
+                    <button>Link 3</button>
+                </div>
+            </li>
+        </ul>
+    </aside>
+    <script>
+        function dispatchEvent(eventName) {
+            return new Function(eventName);
+        }
+        var index;
+        function myFunction(x) {
+            document.getElementById("myDropdown" + x).classList.toggle("show");
+            index = x;
+        }
+        window.onclick = function (e) {
+            // console.log(e.target?.className);
+            if (!(e?.target?.matches('.dropbtn#btn' + index) || (typeof e.target.className !== "object" && e?.target?.parentNode?.matches('.dropbtn#btn' + index)))) {
+                index = -1;
+            }
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var d = 0; d < dropdowns.length; d++) {
+                var openDropdown = dropdowns[d];
+                if (openDropdown.classList.contains('show') && d != index) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        class CCI {
+            constructor(period = 20) {
+                this.md = new MeanDeviationProvider(period);
+                this.sma = new SMA(period);
+            }
+            nextValue(high, low, close) {
+                const typicalPrice = (high + low + close) / 3;
+                const average = this.sma.nextValue(typicalPrice);
+                const meanDeviation = this.md.nextValue(typicalPrice, average);
+                return meanDeviation && (typicalPrice - average) / (0.015 * meanDeviation);
+            }
+            momentValue(high, low, close) {
+                const typicalPrice = (high + low + close) / 3;
+                const average = this.sma.momentValue(typicalPrice);
+                const meanDeviation = this.md.momentValue(typicalPrice, average);
+                return meanDeviation && (typicalPrice - average) / (0.015 * meanDeviation);
+            }
+        }
+        class CircularBuffer {
+            constructor(length) {
+                this.buffer = new Array(length);
+                this.maxIndex = length - 1;
+                this.pointer = 0;
+                this.filled = false;
+            }
+            push(item) {
+                const overwrited = this.buffer[this.pointer];
+                this.buffer[this.pointer] = item;
+                this.iteratorNext();
+                return overwrited;
+            }
+
+            /**
+             * Replace last added item in buffer (reversal push). May be used for revert push removed item.
+             * @deprecated use peek instead
+             */
+            pushback(item) {
+                this.iteratorPrev();
+                const overwrited = this.buffer[this.pointer];
+                this.buffer[this.pointer] = item;
+                return overwrited;
+            }
+            peek() {
+                return this.buffer[this.pointer];
+            }
+            forEach(callback) {
+                let idx = this.pointer;
+                let virtualIdx = 0;
+                while (virtualIdx !== this.length) {
+                    callback(this.buffer[idx], virtualIdx);
+                    idx = (this.length + idx + 1) % this.length;
+                    virtualIdx++;
+                }
+            }
+            forEachRight(callback) {
+                let idx = (this.length + this.pointer - 1) % this.length;
+                let virtualIdx = this.length - 1;
+
+                while (virtualIdx !== this.length) {
+                    callback(this.buffer[idx], virtualIdx);
+                    idx = (this.length + idx - 1) % this.length;
+                    virtualIdx--;
+                }
+            }
+            fill(item) {
+                this.buffer.fill(item);
+                this.filled = true;
+            }
+            toArray() {
+                return this.buffer;
+            }
+            iteratorNext() {
+                this.pointer++;
+                if (this.pointer > this.maxIndex) {
+                    this.pointer = 0;
+                    this.filled = true;
+                }
+            }
+            iteratorPrev() {
+                this.pointer--;
+                if (this.pointer < 0) {
+                    this.pointer = this.maxIndex;
+                }
+            }
+        }
+        class MeanDeviationProvider {
+            constructor(period) {
+                this.values = new CircularBuffer(period);
+                this.period = period;
+            }
+            nextValue(typicalPrice, average) {
+                if (!average) {
+                    this.values.push(typicalPrice);
+                    return void 0;
+                }
+                this.nextValue = this.pureNextValue;
+                this.momentValue = this.pureMomentValue;
+                return this.pureNextValue(typicalPrice, average);
+            }
+            momentValue(typicalPrice, average) {
+                return void 0;
+            }
+            pureNextValue(typicalPrice, average) {
+                this.values.push(typicalPrice);
+                return (
+                    this.values
+                        .toArray()
+                        .reduce((acc, value) => acc + this.positiveDelta(average, value), 0) /
+                    this.period
+                );
+            }
+            pureMomentValue(typicalPrice, average) {
+                const rm = this.values.push(typicalPrice);
+                const mean = this.values
+                    .toArray()
+                    .reduce((acc, value) => acc + this.positiveDelta(average, value), 0);
+                this.values.pushback(rm);
+                return mean / this.period;
+            }
+            positiveDelta(a, b) {
+                return a > b ? a - b : b - a;
+            }
+        }
+        class SMA {
+            constructor(period) {
+                this.circular = new CircularBuffer(period);
+                this.sum = 0;
+                this.period = period;
+            }
+            nextValue(value) {
+                this.circular.push(value);
+                this.sum += value;
+                if (!this.circular.filled) {
+                    return;
+                }
+                this.nextValue = (value) => {
+                    this.sum = this.sum - this.circular.push(value) + value;
+                    return this.sum / this.period;
+                };
+                this.momentValue = (value) => {
+                    return (this.sum - this.circular.peek() + value) / this.period;
+                };
+                return this.sum / this.period;
+            }
+            momentValue(value) {
+                return;
+            }
+        }
+        class EMA {
+            constructor(period) {
+                this.period = period;
+                this.smooth = 2 / (this.period + 1);
+                this.sma = new SMA(this.period);
+            }
+            nextValue(value) {
+                const sma = this.sma.nextValue(value);
+                if (sma) {
+                    this.ema = sma;
+                    this.nextValue = (value) => {
+                        return (this.ema = (value - this.ema) * this.smooth + this.ema);
+                    };
+                    this.momentValue = (value) => {
+                        return (value - this.ema) * this.smooth + this.ema;
+                    };
+                }
+                return sma;
+            }
+            momentValue(value) {
+                return;
+            }
+        }
+        class MACD {
+            constructor(periodEmaFast = 12, periodEmaSlow = 26, periodSignal = 9) {
+                this.emaFastIndicator = new EMA(periodEmaFast);
+                this.emaSlowIndicator = new EMA(periodEmaSlow);
+                this.emaSignalIndicator = new EMA(periodSignal);
+            }
+            nextValue(value) {
+                const emaFast = this.emaFastIndicator.nextValue(value);
+                const emaSlow = this.emaSlowIndicator.nextValue(value);
+                const macd = emaFast - emaSlow;
+                const signal = (macd && this.emaSignalIndicator.nextValue(macd)) || undefined;
+                const histogram = macd - signal || undefined;
+                if (isNaN(macd)) {
+                    return;
+                }
+                return {
+                    macd,
+                    emaFast,
+                    emaSlow,
+                    signal,
+                    histogram,
+                };
+            }
+            momentValue(value) {
+                const emaFast = this.emaFastIndicator.momentValue(value);
+                const emaSlow = this.emaSlowIndicator.momentValue(value);
+                const macd = emaFast - emaSlow;
+                const signal = macd && this.emaSignalIndicator.momentValue(macd);
+                const histogram = macd - signal;
+                return {
+                    macd,
+                    emaFast,
+                    emaSlow,
+                    signal,
+                    histogram,
+                };
+            }
+        }
+
+    </script>
+    <div id="container" class="chart"></div>
+</body>
+
+</html>

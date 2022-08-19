@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Responsive</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<head>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: helvetica, arial, "san-serif"
+        }
+
+        .filter-switch li {
+            list-style-type: none;
+        }
+
+        .filter-switch .active a {
+            font-weight: bold;
+            text-decoration: none;
+            color: #000;
+        }
+
+        .relative-size-chart .chart-bg {
+            fill: #f8f8f8;
+            stroke: #dfdfdf
+        }
+
+        .relative-size-chart .cluster-line {
+            stroke-width: 2px;
+            stroke: #FFF
+        }
+
+        .relative-size-chart .centerline {
+            stroke: #F15727;
+            stroke-width: 1px
+        }
+
+        .relative-size-chart .bubble {
+            fill: #639dea;
+            stroke-width: 5px;
+            stroke: #3681e4;
+            pointer-events: all
+        }
+
+        .relative-size-chart .bubble.empty {
+            stroke: #CCC;
+            fill: #999
+        }
+
+        .relative-size-chart .bubble.empty:hover {
+            cursor: default
+        }
+
+        .relative-size-chart .cluster-value {
+            font-size: 2em;
+            font-weight: 700
+        }
+
+        .relative-size-chart .cluster-name {
+            font-size: 1em;
+            font-weight: 400
+        }
+
+        .relative-size-chart .total-cluster {
+            fill: #F15727
+        }
+
+        .relative-size-chart text {
+            fill: #FFF;
+            text-anchor: middle;
+            pointer-events: none
+        }
+
+        .relative-size-chart text.header {
+            fill: #000;
+            font-size: .75em;
+            font-weight: 700;
+            text-transform: uppercase
+        }
+
+        .relative-size-chart .total-value {
+            font-size: 2.25em;
+            font-weight: 700
+        }
+
+        .relative-size-chart .total-name {
+            font-size: 1em;
+            font-weight: 400
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <ul class="filter-switch">
+        <li class="active"><a href="#">data1</a></li>
+        <li><a href="#">data2</a></li>
+    </ul>
+
+    <div class="relative-size-chart" id="overview-graph"></div>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="scripts.js"></script>
+
+</body>

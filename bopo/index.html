@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    body {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: block;
+    }
+
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+    }
+
+    .upperline {
+        fill: none;
+        stroke: grey !important;
+        stroke-width: 1.5px;
+    }
+
+    .lowerline {
+        fill: none;
+        stroke: grey !important;
+        stroke-width: 1.5px;
+    }
+</style>
+
+<body>
+    <div id="plot1"></div>
+    <div id="plot2"></div>
+    <div id="plot3"></div>
+    <div id="plot4"></div>
+    <div id="plot5"></div>
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script>
+
+
+        var movingAvg = function (n) {
+            return function (points) {
+                points = points.map(function (each, index, array) {
+                    var to = index + n - 1;
+                    var subSeq, sum;
+                    if (to < points.length) {
+                        subSeq = array.slice(index, to + 1);
+                        sum = subSeq.reduce(function (a, b) {
+                            return [a[0] + b[0], a[1] + b[1]];
+                        });
+                        return sum.map(function (each) { return each / n; });
+                    }
+                    return undefined;
+                });
+                points = points.filter(function (each) { return typeof each !== 'undefined' })
+                // Note that one could re-interpolate the points
+                // to form a basis curve (I think...)
+                return points.join("L");
+            }
+        };
+
+        var bollingerUpper = function (n) {
+            return function (points) {
+                points = points.map(function (each, index, array) {
+                    var to = index + n - 1;
+                    var subSeq;
+                    if (to < points.length) {
+                        subSeq = array.slice(index, to + 1);
+
+                        var sum = 0;
+                        subSeq.forEach(function (entry) {
+                            sum += entry[1]
+                        });
+                        var avg = (sum / n);
+
+
+                        var varianceSum = 0;
+                        subSeq.forEach(function (entry) {
+                            var dx = entry[1] - avg;
+                            varianceSum += (dx * dx);
+                        });
+
+
+                        var variance = (varianceSum / n);
+                        var stddev = Math.sqrt(variance);
+
+                        // Will this return the right kind of array??
+                        //return sum.map(function(each) { return each / n; });
+                        var upperArray = [array[to][0], avg - (2 * stddev)];
+                        return upperArray
+                    }
+                    return undefined;
+                });
+                points = points.filter(function (each) { return typeof each !== 'undefined' })
+                return points.join("L");
+            }
+        };
+
+        var bollingerLower = function (n) {
+            return function (points) {
+                points = points.map(function (each, index, array) {
+                    var to = index + n - 1;
+                    var subSeq;
+                    if (to < points.length) {
+                        subSeq = array.slice(index, to + 1);
+
+                        var sum = 0;
+                        subSeq.forEach(function (entry) {
+                            sum += entry[1]
+                        });
+                        var avg = (sum / n);
+
+
+                        var varianceSum = 0;
+                        subSeq.forEach(function (entry) {
+                            var dx = entry[1] - avg;
+                            varianceSum += (dx * dx);
+                        });
+
+
+                        var variance = (varianceSum / n);
+                        var stddev = Math.sqrt(variance);
+
+                        // Will this return the right kind of array??
+                        //return sum.map(function(each) { return each / n; });
+                        var upperArray = [array[to][0], avg + (2 * stddev)];
+                        return upperArray
+                    }
+                    return undefined;
+                });
+                points = points.filter(function (each) { return typeof each !== 'undefined' })
+                return points.join("L");
+            }
+        };
+
+
+        var margin = { top: 20, right: 80, bottom: 30, left: 50 },
+            width = 960 - margin.left - margin.right,
+            height = 200 - margin.top - margin.bottom;
+
+        var parseDate = d3.time.format("%m/%d/%Y").parse;
+
+        var x = d3.time.scale()
+            .range([0, width]);
+
+        var y = d3.scale.linear()
+            .range([height, 0]);
+
+        var color = d3.scale.category10();
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+        var line = d3.svg.line()
+            .interpolate("basis")
+            .x(function (d) { return x(d.date); })
+            .y(function (d) { return y(d.volume); });
+
+        var lineUpper = d3.svg.line()
+            .interpolate(bollingerUpper(14))
+            .x(function (d) { return x(d.date); })
+            .y(function (d) { return y(d.volume); });
+
+        var lineLower = d3.svg.line()
+            .interpolate(bollingerLower(14))
+            .x(function (d) { return x(d.date); })
+            .y(function (d) { return y(d.volume); });
+
+        // Build the Plot 1
+
+        var svg1 = d3.select("#plot1").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data/timeseries-real.csv", function (error, data) {
+            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "date"; }));
+
+            data.forEach(function (d) {
+                d.date = parseDate(d.date);
+            });
+
+            var communities = color.domain().map(function (name) {
+                return {
+                    name: name,
+                    values: data.map(function (d) {
+                        return { date: d.date, volume: +d[name] };
+                    })
+                };
+            });
+
+            communities_slice = communities.slice(0, 1);
+
+            x.domain(d3.extent(data, function (d) { return d.date; }));
+
+            y.domain([
+                d3.min(communities_slice, function (c) { return d3.min(c.values, function (v) { return v.volume; }); }),
+                d3.max(communities_slice, function (c) { return d3.max(c.values, function (v) { return v.volume; }); })
+            ]);
+
+            svg1.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg1.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Volume of Documents");
+
+            var community = svg1.selectAll(".community")
+                .data(communities_slice)
+                .enter().append("g")
+                .attr("class", "community");
+
+            community.append("path")
+                .attr("class", "line")
+                .attr("d", function (d) { return line(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "upperline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineUpper(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "lowerline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineLower(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("text")
+                .datum(function (d) { return { name: d.name, value: d.values[d.values.length - 1] }; })
+                .attr("transform", function (d) { return "translate(" + x(d.value.date) + "," + y(d.value.volume) + ")"; })
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .text(function (d) { return d.name; });
+        });
+
+
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        // Build  Plot 2
+
+        var svg2 = d3.select("#plot2").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data/timeseries-real.csv", function (error, data) {
+            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "date"; }));
+
+            data.forEach(function (d) {
+                d.date = parseDate(d.date);
+            });
+
+            var communities = color.domain().map(function (name) {
+                return {
+                    name: name,
+                    values: data.map(function (d) {
+                        return { date: d.date, volume: +d[name] };
+                    })
+                };
+            });
+
+            communities_slice = communities.slice(1, 2);
+
+            x.domain(d3.extent(data, function (d) { return d.date; }));
+
+            y.domain([
+                d3.min(communities_slice, function (c) { return d3.min(c.values, function (v) { return v.volume; }); }),
+                d3.max(communities_slice, function (c) { return d3.max(c.values, function (v) { return v.volume; }); })
+            ]);
+
+            svg2.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg2.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Volume of Documents");
+
+            var community = svg2.selectAll(".community")
+                .data(communities_slice)
+                .enter().append("g")
+                .attr("class", "community");
+
+            community.append("path")
+                .attr("class", "line")
+                .attr("d", function (d) { return line(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "upperline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineUpper(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "lowerline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineLower(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("text")
+                .datum(function (d) { return { name: d.name, value: d.values[d.values.length - 1] }; })
+                .attr("transform", function (d) { return "translate(" + x(d.value.date) + "," + y(d.value.volume) + ")"; })
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .text(function (d) { return d.name; });
+        });
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        // Build  Plot 3
+
+        var svg3 = d3.select("#plot3").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data/timeseries-real.csv", function (error, data) {
+            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "date"; }));
+
+            data.forEach(function (d) {
+                d.date = parseDate(d.date);
+            });
+
+            var communities = color.domain().map(function (name) {
+                return {
+                    name: name,
+                    values: data.map(function (d) {
+                        return { date: d.date, volume: +d[name] };
+                    })
+                };
+            });
+
+            communities_slice = communities.slice(2, 3);
+
+            x.domain(d3.extent(data, function (d) { return d.date; }));
+
+            y.domain([
+                d3.min(communities_slice, function (c) { return d3.min(c.values, function (v) { return v.volume; }); }),
+                d3.max(communities_slice, function (c) { return d3.max(c.values, function (v) { return v.volume; }); })
+            ]);
+
+            svg3.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg3.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Volume of Documents");
+
+            var community = svg3.selectAll(".community")
+                .data(communities_slice)
+                .enter().append("g")
+                .attr("class", "community");
+
+            community.append("path")
+                .attr("class", "line")
+                .attr("d", function (d) { return line(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "upperline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineUpper(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "lowerline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineLower(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("text")
+                .datum(function (d) { return { name: d.name, value: d.values[d.values.length - 1] }; })
+                .attr("transform", function (d) { return "translate(" + x(d.value.date) + "," + y(d.value.volume) + ")"; })
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .text(function (d) { return d.name; });
+        });
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        // Build  Plot 4
+
+        var svg4 = d3.select("#plot4").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data/timeseries-real.csv", function (error, data) {
+            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "date"; }));
+
+            data.forEach(function (d) {
+                d.date = parseDate(d.date);
+            });
+
+            var communities = color.domain().map(function (name) {
+                return {
+                    name: name,
+                    values: data.map(function (d) {
+                        return { date: d.date, volume: +d[name] };
+                    })
+                };
+            });
+
+            communities_slice = communities.slice(3, 4);
+
+            x.domain(d3.extent(data, function (d) { return d.date; }));
+
+            y.domain([
+                d3.min(communities_slice, function (c) { return d3.min(c.values, function (v) { return v.volume; }); }),
+                d3.max(communities_slice, function (c) { return d3.max(c.values, function (v) { return v.volume; }); })
+            ]);
+
+            svg4.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg4.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Volume of Documents");
+
+            var community = svg4.selectAll(".community")
+                .data(communities_slice)
+                .enter().append("g")
+                .attr("class", "community");
+
+            community.append("path")
+                .attr("class", "line")
+                .attr("d", function (d) { return line(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "upperline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineUpper(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "lowerline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineLower(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("text")
+                .datum(function (d) { return { name: d.name, value: d.values[d.values.length - 1] }; })
+                .attr("transform", function (d) { return "translate(" + x(d.value.date) + "," + y(d.value.volume) + ")"; })
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .text(function (d) { return d.name; });
+        });
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        // Build  Plot 5
+
+        var svg5 = d3.select("#plot5").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data/timeseries-real.csv", function (error, data) {
+            color.domain(d3.keys(data[0]).filter(function (key) { return key !== "date"; }));
+
+            data.forEach(function (d) {
+                d.date = parseDate(d.date);
+            });
+
+            var communities = color.domain().map(function (name) {
+                return {
+                    name: name,
+                    values: data.map(function (d) {
+                        return { date: d.date, volume: +d[name] };
+                    })
+                };
+            });
+
+            communities_slice = communities.slice(4, 5);
+
+            x.domain(d3.extent(data, function (d) { return d.date; }));
+
+            y.domain([
+                d3.min(communities_slice, function (c) { return d3.min(c.values, function (v) { return v.volume; }); }),
+                d3.max(communities_slice, function (c) { return d3.max(c.values, function (v) { return v.volume; }); })
+            ]);
+
+            svg5.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            svg5.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Volume of Documents");
+
+            var community = svg5.selectAll(".community")
+                .data(communities_slice)
+                .enter().append("g")
+                .attr("class", "community");
+
+            community.append("path")
+                .attr("class", "line")
+                .attr("d", function (d) { return line(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "upperline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineUpper(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("path")
+                .attr("class", "lowerline")
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", function (d) { return lineLower(d.values); })
+                .style("stroke", function (d) { return color(d.name); });
+
+            community.append("text")
+                .datum(function (d) { return { name: d.name, value: d.values[d.values.length - 1] }; })
+                .attr("transform", function (d) { return "translate(" + x(d.value.date) + "," + y(d.value.volume) + ")"; })
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .text(function (d) { return d.name; });
+        });
+
+    </script>
+</body>
+
+</html>

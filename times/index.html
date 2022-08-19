@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        /**********************************************************
+*	  Metric Modal Chart (Views, Downloads, Citations)	  *
+***********************************************************/
+
+        /*
+============ GENERAL CHART TEXT STYLE ===========		[metric modal chart]
+*/
+
+        #metric-modal .metric-chart text {
+            fill: #565656;
+            font-size: 9px;
+            font-family: Helvetica, Arial, "sans serif";
+        }
+
+        /*
+============ WHEN THERE IS NO DATA: ===========		[metric modal chart]
+*/
+
+        #metric-modal .metric-chart text.no-data {
+            font-size: 16px;
+            font-weight: 100;
+            fill: #d0d0d0;
+        }
+
+        #metric-modal .metric-chart rect.no-data {
+            fill: #f5f5f5;
+        }
+
+        /*
+	============ WHEN THERE IS DATA: ===========		[metric modal chart]
+*/
+
+        #metric-modal {
+            /* CB: padding to display better on bl.ocks.org */
+            padding: 64px;
+        }
+
+        /*
+	--- AXES ---		[metric modal chart]
+*/
+
+        /* --- x axis focus --- */
+
+        #metric-modal .metric-chart .focus .axis {
+            shape-rendering: crispEdges;
+        }
+
+        #metric-modal .metric-chart .focus .x.axis {
+            clip-path: url(#clip);
+        }
+
+        #metric-modal .metric-chart .focus .x.axis line {
+            display: none;
+        }
+
+        #metric-modal .metric-chart .focus .x.axis .tick:hover {
+            cursor: default;
+        }
+
+
+        /* --- x axis context --- */
+
+        #metric-modal .metric-chart .context .x.axis line {
+            display: none;
+        }
+
+
+        #metric-modal .metric-chart .context .x.axis .domain {
+            display: none;
+        }
+
+        /* --- focus y-axis --- */
+
+        #metric-modal .metric-chart .focus .y.axis .domain {
+            display: none;
+        }
+
+        #metric-modal .metric-chart .y.axis.title {
+            font-size: 13px;
+            font-weight: 100;
+        }
+
+        /* horizontal focus gridlines */
+        #metric-modal .metric-chart .y.axis line {
+            stroke: #565656;
+            stroke-dasharray: 2, 2;
+            stroke-opacity: 0.3;
+        }
+
+        /*
+	--- BRUSH ---		[metric modal chart]
+*/
+
+        /* --- brush window --- */
+
+        #metric-modal .metric-chart .brush .extent {
+            fill-opacity: .07;
+            shape-rendering: crispEdges;
+            clip-path: url(#clip);
+            fill: #70706c;
+        }
+
+        /* --- brush handles --- */
+
+        #metric-modal .metric-chart .resize .handle {
+            fill: #555;
+        }
+
+        #metric-modal .metric-chart .resize .handle-mini {
+            fill: white;
+            stroke-width: 1px;
+            stroke: #555;
+        }
+
+        /*
+	--- ZOOM TO BUTTONS ---		[metric modal chart]
+*/
+
+        #metric-modal .metric-chart .scale_button rect {
+            fill: #eaeaea;
+        }
+
+        #metric-modal .metric-chart .scale_button:hover text {
+            fill: white;
+            transition: all 0.1s cubic-bezier(.25, .8, .25, 1);
+        }
+
+        #metric-modal .metric-chart .scale_button:hover rect {
+            fill: #00AA8D;
+            transition: all 0.1s cubic-bezier(.25, .8, .25, 1);
+        }
+
+        /*
+	--- EXPLANATORY TEXT (# views/downloads) ---		[metric modal chart]
+*/
+
+        #metric-modal .metric-chart text#totalCount {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        #metric-modal .metric-chart text#displayDates {
+            font-weight: bold;
+        }
+
+        /*
+	--- BARS ---		[metric modal chart]
+*/
+
+
+        #metric-modal .metric-chart .bar,
+        #metric-modal .metric-chart .bar_context {
+            fill: #00AA8D;
+            stroke-width: 0;
+        }
+
+        #metric-modal .metric-chart .bar {
+            stroke: #00AA8D;
+            clip-path: url(#clip);
+            cursor: default;
+        }
+
+        /* --- context bars --- */
+
+
+        /*
+	--- PANE CURSORS ---		[metric modal chart]
+*/
+
+        #metric-modal .metric-chart rect.pane {
+            cursor: move;
+            /* fallback if grab cursor is unsupported */
+            cursor: grab;
+            fill: #FAFAFA;
+            pointer-events: all;
+        }
+
+        #metric-modal .metric-chart rect.pane:active {
+            cursor: move;
+            /* fallback if grab cursor is unsupported */
+            cursor: grabbing;
+        }
+
+        /*
+	--- TOOLTIPS ---		[metric modal chart]
+*/
+
+        div.tooltip {
+            position: fixed;
+            text-align: center;
+            width: 60px;
+            height: 25px;
+            padding: 2px;
+            font: 10px sans-serif;
+            background: white;
+            color: #565656;
+            border: 0px;
+            border-radius: 2px;
+            pointer-events: none;
+            box-shadow: 0 0px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="metric-modal"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+
+    <script src="./script.js"></script>
+</body>
+
+</html>

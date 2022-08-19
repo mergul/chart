@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Web Component</title>
+    <style>
+        .line {
+            stroke: #b43c3c;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .x-bottom path {
+            stroke: none;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 10px;
+            font-family: sans-serif;
+        }
+
+        .text-label {
+            font-size: 10px;
+            font-family: sans-serif;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.12.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <table style="float: right;">
+        <tr>
+            <td style="text-align: right">
+                DNGP Growth
+            </td>
+            <td>
+                <div
+                    style="HEIGHT: 20px; WIDTH: 20px; BACKGROUND: rgb(31,95,55); POSITION: relative; border-radius: 50%">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right">
+                DNNSI Growth
+            </td>
+            <td>
+                <div
+                    style="HEIGHT: 20px; WIDTH: 20px; BACKGROUND: rgb(180,60,60); POSITION: relative; border-radius: 50%">
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div id="trendChartContainer"></div>
+    <!-- <script src="../node_modules/d3/dist/d3.min.js"></script> -->
+    <script src="./script.js" type="text/javascript"></script>
+</body>
+
+</html>

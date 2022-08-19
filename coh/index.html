@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Testing the News Web Component</title>
+    <style>
+        .tick line {
+            opacity: .1;
+        }
+
+        .tick text {
+            font: 10px sans-serif;
+        }
+
+        .axis path.domain {
+            opacity: .1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <button id="btn">reset</button> -->
+    <div id="container"></div>
+    <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
+    <script src="../node_modules/d3/dist/d3.min.js"></script>
+    <script src="./script.js" type="text/javascript"></script>
+    <script src="./tracker.js" type="text/javascript"></script>
+    <script>
+        const candle = () => {
+            const parseDate = d3.timeParse("%Y-%m-%d");
+            var myCandleChart = ZoomableCandleChart();
+
+            d3.csv("aapl-2.csv")
+                .then(function (data) {
+                    return data.map(function (d) {
+                        return {
+                            Date: parseDate(d.Date),
+                            Open: +d.Open,
+                            High: +d.High,
+                            Low: +d.Low,
+                            Close: +d.Close,
+                            Volume: +d.Volume,
+                        };
+                    }).slice(-100);
+                })
+                .then((data) => {
+                    d3.select("#container")
+                        .datum(data)
+                        .call(myCandleChart);
+                    setInterval(() => {
+                        const last = data[data.length - 1];
+                        const random = Math.random();
+                        if (last.Open > last.Close) {
+                            last.High += Math.sign(random - 0.5) * random / 20;
+                            last.Close += Math.sign(random - 0.5) * random / 20;
+
+                        } else {
+                            last.Low += Math.sign(random - 0.5) * random / 20;
+                            last.Open += Math.sign(random - 0.5) * random / 20;
+
+                        }
+                        d3.select("#container")
+                            .datum(data)
+                            .call(myCandleChart);
+                    }, 3000);
+                    setInterval(() => {
+                        const first = data.shift();
+                        let firstDate = new Date(data[data.length - 1].Date);
+                        firstDate.setMinutes(firstDate.getMinutes() + 1);
+                        data.push({
+                            Date: firstDate,
+                            Open: first.Open,
+                            High: first.High,
+                            Low: first.Low,
+                            Close: first.Close,
+                            Volume: first.Volume + first.Volume / 4,
+                        });
+
+                        d3.select("#container")
+                            .datum(data)
+                            .call(myCandleChart);
+                    }, 12000);
+                });
+        }
+        candle();
+
+    </script>
+</body>
+
+</html>

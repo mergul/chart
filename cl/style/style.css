@@ -1,0 +1,156 @@
+html * {
+  box-sizing: border-box;
+}
+
+#chart {
+  width: 1280px;
+  position: relative;
+}
+
+.chart .axis text {
+  font: 10px sans-serif;
+}
+
+.chart .axis .domain,
+.chart .axis .tick line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.chart .gridlines {
+  stroke: lightgrey;
+  shape-rendering: crispEdges;
+  stroke-width: 1;
+}
+
+.chart .ohlc-series path {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1.5;
+}
+
+.chart .ohlc-series .up-days {
+  stroke: green;
+}
+
+.chart .ohlc-series .down-days {
+  stroke: red;
+}
+
+.chart .ohlc-series .bar.up-day {
+  stroke: green;
+}
+
+.chart .ohlc-series .bar.down-day {
+  stroke: red;
+}
+
+.chart .candlestick-series .bar path {
+  stroke: black;
+}
+
+.chart .comparison-series .line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart .bar.up-day rect {
+  fill: green;
+}
+
+.chart .bar.down-day rect {
+  fill: red;
+}
+
+.chart .zoom-pane {
+  fill: none;
+  pointer-events: all;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+.chart .annotation {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-dasharray: 3, 3;
+}
+.chart .tracker-close-avg {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-dasharray: 3, 3;
+}
+.chart .bollingerBandArea {
+  fill: lightgrey;
+  stroke-width: 0;
+}
+
+.chart .bollingerBandUpper {
+  fill: none;
+  stroke: darkgrey;
+  stroke-width: 2;
+}
+
+.chart .bollingerBandLower {
+  fill: none;
+  stroke: darkgrey;
+  stroke-width: 2;
+}
+
+.chart .bollingerAverage {
+  fill: none;
+  stroke: darkgrey;
+  stroke-width: 1;
+  stroke-dasharray: 4, 1;
+}
+.chart line.crosshairs {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-opacity: 0.5;
+}
+
+.chart circle.crosshairs {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-opacity: 0.5;
+}
+
+.chart text.crosshairs {
+  font: 10px sans-serif;
+}
+.chart .overlay {
+  stroke-width: 0px;
+  fill-opacity: 0;
+}
+.chart line.fibonacci-fan {
+  fill: none;
+  stroke: grey;
+  stroke-width: 2;
+  stroke-opacity: 0.5;
+}
+
+.chart line.fibonacci-fan.source {
+  stroke: blue;
+  stroke-width: 1.5;
+}
+
+.chart line.fibonacci-fan.b {
+  stroke-opacity: 0.4;
+}
+
+.chart circle.fibonacci-fan {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1;
+  stroke-opacity: 0.5;
+}
+
+.chart polygon.fibonacci-fan.area {
+  fill: lightgrey;
+  fill-opacity: 0.5;
+  stroke-width: 0;
+}

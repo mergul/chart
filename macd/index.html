@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Testing the News Web Component</title>
+    <!-- include polyfills for custom event, Symbol and Custom Elements -->
+    <!-- <script src="//unpkg.com/babel-polyfill@6.26.0/dist/polyfill.js"></script>
+    <script src="//unpkg.com/custom-event-polyfill@0.3.0/custom-event-polyfill.js"></script>
+    <script
+        src="//cdnjs.cloudflare.com/ajax/libs/document-register-element/1.8.0/document-register-element.js"></script> -->
+
+    <!-- use babel so that we can use arrow functions and other goodness in this block! -->
+    <!-- <script src="//unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+
+    <script src="//unpkg.com/d3@5.5.0"></script>
+    <style>
+        .signal {
+            stroke: red;
+        }
+
+        .macd {
+            stroke: #06c;
+        }
+    </style>
+    <script>
+        function functor(v) {
+            return typeof v === 'function' ? v : function () {
+                return v;
+            };
+        }
+        function identity(d) {
+            return d;
+        }
+
+        var createReboundMethod = (function (target, source, name) {
+            var method = source[name];
+
+            if (typeof method !== 'function') {
+                throw new Error("Attempt to rebind ".concat(name, " which isn't a function on the source object"));
+            }
+
+            return function () {
+                for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
+                var value = method.apply(source, args);
+                return value === source ? target : value;
+            };
+        });
+        var rebind = (function (target, source) {
+            for (var _len = arguments.length, names = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+                names[_key - 2] = arguments[_key];
+            }
+
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = names[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var name = _step.value;
+
+                    target[name] = createReboundMethod(target, source, name);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return target;
+        });
+        var createTransform = function createTransform(transforms) {
+            return function (name) {
+                return transforms.reduce(function (name, fn) {
+                    return name && fn(name);
+                }, name);
+            };
+        };
+        var rebindAll = (function (target, source) {
+            for (var _len = arguments.length, transforms = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+                transforms[_key - 2] = arguments[_key];
+            }
+
+            var transform = createTransform(transforms);
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = Object.keys(source)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var name = _step.value;
+
+                    var result = transform(name);
+                    if (result) {
+                        target[result] = createReboundMethod(target, source, name);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return target;
+        });
+
+        var includeMap = (function (mappings) {
+            return function (name) {
+                return mappings[name];
+            };
+        });
+        function convertNaN(value) {
+            return typeof value === 'number' && isNaN(value) ? undefined : value;
+        }
+        var exponentialMovingAverage = function () {
+
+            var value = identity;
+            var period = function period() {
+                return 9;
+            };
+
+            var initialMovingAverageAccumulator = function initialMovingAverageAccumulator(period) {
+                var values = [];
+                return function (value) {
+                    var movingAverage = void 0;
+                    if (values.length < period) {
+                        if (value != null) {
+                            values.push(value);
+                        } else {
+                            values = [];
+                        }
+                    }
+                    if (values.length >= period) {
+                        movingAverage = d3.mean(values);
+                    }
+                    return movingAverage;
+                };
+            };
+            var exponentialMovingAverage = function exponentialMovingAverage(data) {
+                var size = period.apply(this, arguments);
+                var alpha = 2 / (size + 1);
+                var initialAccumulator = initialMovingAverageAccumulator(size);
+                var ema = void 0;
+                return data.map(function (d, i) {
+                    var v = value(d, i);
+                    if (ema === undefined) {
+                        ema = initialAccumulator(v);
+                    } else {
+                        ema = v * alpha + (1 - alpha) * ema;
+                    }
+                    return convertNaN(ema);
+                });
+            };
+
+            exponentialMovingAverage.period = function () {
+                if (!arguments.length) {
+                    return period;
+                }
+                period = functor(arguments.length <= 0 ? undefined : arguments[0]);
+                return exponentialMovingAverage;
+            };
+
+            exponentialMovingAverage.value = function () {
+                if (!arguments.length) {
+                    return value;
+                }
+                value = arguments.length <= 0 ? undefined : arguments[0];
+                return exponentialMovingAverage;
+            };
+
+            return exponentialMovingAverage;
+        };
+
+        var macd = function () {
+
+            var value = identity;
+
+            var fastEMA = exponentialMovingAverage().period(12);
+            var slowEMA = exponentialMovingAverage().period(26);
+            var signalEMA = exponentialMovingAverage().period(9);
+
+            var macd = function macd(data) {
+
+                fastEMA.value(value);
+                slowEMA.value(value);
+
+                var diff = d3.zip(fastEMA(data), slowEMA(data)).map(function (d) {
+                    return d[0] !== undefined && d[1] !== undefined ? d[0] - d[1] : undefined;
+                });
+
+                var averageDiff = signalEMA(diff);
+
+                return d3.zip(diff, averageDiff).map(function (d) {
+                    return {
+                        macd: d[0],
+                        signal: d[1],
+                        divergence: d[0] !== undefined && d[1] !== undefined ? d[0] - d[1] : undefined
+                    };
+                });
+            };
+
+            macd.value = function () {
+                if (!arguments.length) {
+                    return value;
+                }
+                value = arguments.length <= 0 ? undefined : arguments[0];
+                return macd;
+            };
+
+            rebindAll(macd, fastEMA, includeMap({ 'period': 'fastPeriod' }));
+            rebindAll(macd, slowEMA, includeMap({ 'period': 'slowPeriod' }));
+            rebindAll(macd, signalEMA, includeMap({ 'period': 'signalPeriod' }));
+
+            return macd;
+        };
+
+    </script>
+    <script src="//unpkg.com/d3fc@14.0.41"></script>
+    <!-- <script src="../node_modules/d3fc/build/d3fc.js"></script> -->
+    <script src='chart.js'></script>
+
+</head>
+
+<body>
+    <div id='chart-element' style='height: 500px'></div>
+
+</body>
+
+</html>
